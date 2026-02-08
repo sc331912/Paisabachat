@@ -11,6 +11,9 @@ mongoose.connect(process.env.DB_URL)
 .then(()=>console.log("Database Connected!"))
 .catch(()=>console.log("Database not Connected!"));
 
+import cookieParser from "cookie-parser";
+app.use(cookieParser());
+
 import morgan from "morgan";
 app.use(morgan("dev"));
 app.use(express.json());
