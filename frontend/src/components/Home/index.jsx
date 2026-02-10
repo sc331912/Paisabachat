@@ -1,12 +1,11 @@
 import Homelayout from "../../layout/Homelayout";
+import Login from "./Login";
 
 const HomePage = () => {
   return (
     <Homelayout>
 
-      <h1 className="text-5xl text-red-500 font-bold text-center">
-        Login Page Coming Soon
-      </h1>
+      <Login />
 
     </Homelayout>
   );
