@@ -1,6 +1,8 @@
 import UserModel from "./user.model.js";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import { sendMail } from "../utils/mail.js";
+
 export const createUser= async (req,res) =>{
 
 try{
@@ -13,6 +15,28 @@ try{
     res.status(500).json({message:"Internal Server Error"});
 }
 }
+
+export const sendEmail = async (req, res) => {
+  try {
+    //const { email } = req.body;
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    const template = `<h1>Your OTP: ${otp}</h1>`;
+
+    await sendMail("businesssnchpu@gmail.com", "OTP for Signup", template);
+
+    res.json({
+      success: true,
+      message: "Email sent successfully",
+      otp,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error sending mail" });
+  }
+}
+
 
 const createToken= async (user) =>{
     const payload={

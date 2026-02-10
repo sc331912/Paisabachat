@@ -2,10 +2,31 @@ import { Card, Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined, PhoneOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import Homelayout from "../../../layout/Homelayout";
+import axios from "axios";
+
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL 
 
 const { Item } = Form;
 
 const Signup = () => {
+
+    const onFinish = async (values) => {
+        try {
+    console.log(values);
+
+    const { data } = await axios.post(
+      "/api/user/send-mail",   // email send endpoint
+      values
+    );
+
+    console.log(data);
+    alert("OTP sent to email");
+
+  } catch (error) {
+    console.log(error);
+    alert("Something went wrong");
+  }
+    }
   return (
     <Homelayout>
 
@@ -38,7 +59,10 @@ const Signup = () => {
               Start your smart saving journey
             </p>
 
-            <Form layout="vertical">
+            <Form 
+            name="login_form"
+            layout="vertical"
+            onFinish={onFinish}>
 
               {/* FULL NAME */}
               <Item
