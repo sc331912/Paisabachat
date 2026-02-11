@@ -2,34 +2,42 @@ import UserModel from "./user.model.js";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { sendMail } from "../utils/mail.js";
+import { otpTemplate } from "../utils/otp.template.js";
+import { generateOtp } from "../utils/generate.otp.js";
 
 export const createUser= async (req,res) =>{
 
 try{
-    const data= req.body;
-    const user= new UserModel(data);
-    await user.save();
-    res.json(user);
+    const data = req.body;
 
-}catch(err){
+    const existing = await UserModel.findOne({email:data.email});
+    if(existing){
+        return res.status(400).json({message:"Email already registered"});
+    }
+
+    const user = new UserModel(data);
+    await user.save();
+
+    res.json({message:"Signup success"});
+}
+catch(err){
+    console.log("CREATE USER ERROR:", err);
     res.status(500).json({message:"Internal Server Error"});
 }
 }
 
 export const sendEmail = async (req, res) => {
   try {
-    //const { email } = req.body;
+    const { email } = req.body;
+    const otp = generateOtp();
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
-
-    const template = `<h1>Your OTP: ${otp}</h1>`;
-
-    await sendMail("businesssnchpu@gmail.com", "OTP for Signup", template);
+    await sendMail(email, "OTP for Signup", otpTemplate(otp));
 
     res.json({
       success: true,
       message: "Email sent successfully",
-      otp,
+      otp: otp,
+      success: true
     });
 
   } catch (error) {
