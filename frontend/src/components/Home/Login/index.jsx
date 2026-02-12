@@ -1,10 +1,34 @@
 import { Card, Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { useState } from "react";
+import { toast } from "react-toastify";
+
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const { Item } = Form;
 
 const Login = () => {
+const [loginForm] = Form.useForm();
+const [loading, setLoading] = useState(false);
+
+
+  const onFinish = async (values) => {
+    try {
+      setLoading(true);
+
+      const { data } = await axios.post("/api/user/login", values);
+
+      toast.success("Login successful");
+      console.log("Login response:", data); // Debugging log
+    } catch (error){
+      toast.error(error.response? error.response.data.message : error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-gradient-to-br from-black via-[#03140c] to-black">
 
@@ -35,7 +59,10 @@ const Login = () => {
             Smart way to track & save your money
           </p>
 
-          <Form layout="vertical">
+          <Form name="login_form"
+          layout="vertical"
+          onFinish={onFinish}
+          form={loginForm}>
 
             {/* EMAIL */}
             <Item
@@ -66,6 +93,7 @@ const Login = () => {
             {/* BUTTON */}
             <Item>
               <Button
+              loading={loading}
                 htmlType="submit"
                 block
                 className="!bg-green-500 hover:!bg-green-600 !text-black !font-bold h-11 rounded-lg shadow-[0_0_20px_rgba(0,255,150,0.6)]"

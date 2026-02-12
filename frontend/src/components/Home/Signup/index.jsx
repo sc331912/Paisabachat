@@ -11,46 +11,41 @@ axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 const { Item } = Form;
 
 const Signup = () => {
-
   const [signupForm] = Form.useForm();
-  const [otpForm] = Form.useForm();   // ⭐ added for OTP form
+  const [otpForm] = Form.useForm();
 
   const [formData, setFormData] = useState(null);
   const [otp, setOtp] = useState(null);
+  const [typedOtp, setTypedOtp] = useState("");   // ⭐ FIXED OTP typing
   const [loading, setLoading] = useState(false);
 
   // ================= SEND OTP =================
   const onFinish = async (values) => {
     try {
-      console.log(values);
       setLoading(true);
 
-      const { data } = await axios.post(
-        "/api/user/send-mail",
-        values,
-      );
+      const { data } = await axios.post("/api/user/send-mail", values);
 
       setOtp(data.otp);
       setFormData(values);
 
-      console.log(data);
       toast.success("OTP sent to email");
-    } catch (error) {
+    } catch (error){
       setOtp(null);
       setFormData(null);
-      console.log(error);
-      toast.error("Something went wrong");
+      toast.error(error.response? error.response.data.message : error.message);
     } finally {
       setLoading(false);
     }
   };
 
   // ================= FINAL SIGNUP =================
-  const onSignup = async (values) => {
+  const onSignup = async () => {
     try {
       setLoading(true);
 
-      if (Number(values.otp) !== Number(otp)) {
+      // ⭐ FIXED OTP MATCH
+      if (String(typedOtp) !== String(otp)) {
         setLoading(false);
         return toast.error("Invalid OTP");
       }
@@ -61,12 +56,13 @@ const Signup = () => {
 
       setOtp(null);
       setFormData(null);
+      setTypedOtp("");
 
       signupForm.resetFields();
-      otpForm.resetFields(); // ⭐ reset otp form also
+      otpForm.resetFields();
 
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      toast.error(error.response? error.response.data.message : error.message);
     } finally {
       setLoading(false);
     }
@@ -101,22 +97,19 @@ const Signup = () => {
 
             {/* ================= OTP FORM ================= */}
             {otp ? (
-
               <Form
                 name="otp_form"
                 layout="vertical"
                 onFinish={onSignup}
-                form={otpForm}   // ⭐ FIXED WARNING HERE
+                form={otpForm}
               >
 
-                <Item
-                  name="otp"
-                  label={<span className="text-gray-300">OTP</span>}
-                  rules={[{ required: true, message: "Enter OTP" }]}
-                >
+                <Item label={<span className="text-gray-300">Enter OTP</span>} required>
                   <div className="flex justify-center">
                     <Input.OTP
-                      placeholder="Enter OTP"
+                      length={6}
+                      value={typedOtp}
+                      onChange={(val) => setTypedOtp(val)}
                       className="bg-[rgba(0,0,0,0.6)] text-green-100 border-green-500/40 backdrop-blur-md"
                     />
                   </div>
