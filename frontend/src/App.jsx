@@ -2,6 +2,9 @@ import HomePage from "./components/home";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Signup from "./components/Home/Signup";
 import {ToastContainer,} from "react-toastify";
+import PageNotFound from "./components/PageNotFound";
+import UserLayout from "./components/User/UserLayout";
+
 
 const App=() => {
   return (
@@ -10,6 +13,9 @@ const App=() => {
       <Routes>
         <Route path="/" element={<HomePage />} />
          <Route path="/signup" element={<Signup />} />
+         <Route path="/app/user" element={<UserLayout />} />
+<Route path="/*" element={<PageNotFound />} />
+
       </Routes>
       <ToastContainer />
 
