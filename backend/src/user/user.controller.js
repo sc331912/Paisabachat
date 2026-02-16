@@ -77,7 +77,7 @@ try{
             httpOnly: true
 
     });
-    res.json({message:"Login successful"});
+    res.json({message:"Login successful", role:user.role});
 
 }catch(err){
     res.status(500).json({message:"Internal Server Error"});

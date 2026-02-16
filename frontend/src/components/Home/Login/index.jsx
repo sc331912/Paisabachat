@@ -4,12 +4,15 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+
 
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const { Item } = Form;
 
 const Login = () => {
+  const navigate = useNavigate();
 const [loginForm] = Form.useForm();
 const [loading, setLoading] = useState(false);
 
@@ -19,6 +22,16 @@ const [loading, setLoading] = useState(false);
       setLoading(true);
 
       const { data } = await axios.post("/api/user/login", values);
+      const {role}= data;
+
+      if (role === "admin") {
+  return toast.info("Admin login successful. Please use the admin panel to access admin features.");
+}
+
+// if user
+if (role === "user") {
+  navigate("/app/user");
+}
 
       toast.success("Login successful");
       console.log("Login response:", data); // Debugging log
