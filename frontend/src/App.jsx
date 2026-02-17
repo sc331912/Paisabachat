@@ -4,6 +4,7 @@ import Signup from "./components/Home/Signup";
 import {ToastContainer,} from "react-toastify";
 import PageNotFound from "./components/PageNotFound";
 import UserLayout from "./components/User/UserLayout";
+import ForgotPassword from "./components/Home/forgotPassword";
 
 
 const App=() => {
@@ -13,6 +14,7 @@ const App=() => {
       <Routes>
         <Route path="/" element={<HomePage />} />
          <Route path="/signup" element={<Signup />} />
+         <Route path="/forgot-password" element={<ForgotPassword />} />
          <Route path="/app/user" element={<UserLayout />} />
 <Route path="/*" element={<PageNotFound />} />
 
