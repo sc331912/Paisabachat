@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 import { sendMail } from "../utils/mail.js";
 import { otpTemplate } from "../utils/otp.template.js";
 import { generateOtp } from "../utils/generate.otp.js";
+import { forgotPasswordTemplate } from "../utils/forgot.template.js";
 
 export const createUser= async (req,res) =>{
 
@@ -81,5 +82,44 @@ try{
 
 }catch(err){
     res.status(500).json({message:"Internal Server Error"});
+}
+}
+
+export const forgotPassword= async (req,res) =>{
+
+try{
+    const { email } = req.body;
+
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User does not exist",
+      });
+    }
+
+    // 🔐 generate token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.FORGOT_TOKEN_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    // 🔗 reset link
+    const link = `${process.env.DOMAIN}/forgot-password?token=${token}`;
+
+    // 📧 send email
+    const subject = "Reset Password - Expense Tracker";
+
+    const sent= await sendMail(email, subject, forgotPasswordTemplate(user.fullname, link));
+
+    res.status(200).json({
+      message: "Please check your email to reset password",
+    });
+    if(!sent)
+        return res.status(424).json({message:"Error sending mail"});
+
+}catch(err){
+    res.status(500).json({message:err.message });
 }
 }
