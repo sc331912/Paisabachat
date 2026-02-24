@@ -2,7 +2,7 @@ import { Card, Form, Input, Button } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
@@ -17,7 +17,35 @@ const ForgotPassword = () => {
 const [forgotForm] = Form.useForm();
 const [rePasswordForm] = Form.useForm();
 const [loading, setLoading] = useState(false);
-const [token, setToken] = useState(params.get("token"));
+const [token, setToken] = useState(null);
+
+useEffect(() => {
+  const tok = params.get("token");
+    if (tok) {
+      checkToken(tok);
+    } else {
+      setToken(null);
+    }
+
+},[params]);
+
+const checkToken = async (tok) => {
+    try {
+      await axios.post(
+        "/api/user/verify-token",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${tok}`,
+          },
+        }
+      );
+
+      setToken(tok);
+    } catch(err){
+      setToken(null);
+    }
+  };
 
 
   const onFinish = async (values) => {
@@ -35,22 +63,25 @@ const [token, setToken] = useState(params.get("token"));
 
   const onChangePassword = async (values) => {
     try {
+      if (values.password !== values.rePassword) {
+        return toast.warning("Password and Re-entered password not match");
+      }
       setLoading(true);
 
-      const { data } = await axios.post("/api/user/login", values);
-      const {role}= data;
-
-      if (role === "admin") {
-  return toast.info("Admin login successful. Please use the admin panel to access admin features.");
+      const { data } = await axios.put("/api/user/change-password", values,
+{
+  headers: {
+    Authorization: `Bearer ${token}`,
+  }
 }
 
-// if user
-if (role === "user") {
-  navigate("/app/user");
-}
-
-      toast.success("Login successful");
+      );
+      
+      toast.success("Password updated successfully. Please login with your new password.");
       console.log("Login response:", data); // Debugging log
+      setTimeout(() => {
+        navigate("/");
+      }, 2500);
     } catch (error){
       toast.error(error.response? error.response.data.message : error.message);
     } finally {
@@ -85,7 +116,11 @@ if (role === "user") {
           </h1>
 
           <p className="text-center text-gray-300 mb-6 text-sm">
-            Forgot your password? No worries! Enter your email below and we'll send you instructions to reset it.
+            {
+              token ?
+              "Change your password below and get back to managing your finances with ease!" : 
+              "Forgot your password? No worries! Enter your email below and we'll send you instructions to reset it."
+            }
           </p>
           {
             token ?
@@ -107,7 +142,7 @@ if (role === "user") {
               />
             </Item>
             <Item
-              name="re-password"
+              name="rePassword"
               label={<span className="text-gray-300">Re-Enter Password</span>}
               rules={[{ required: true, message: "Password required" }]}
             >
