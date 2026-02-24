@@ -123,3 +123,33 @@ try{
     res.status(500).json({message:err.message });
 }
 }
+
+export const verifyToken = async (req, res) => {
+  try{
+    res.json({message:"Verification successful"});
+  } catch(err){
+    res.status(500).json({message: err.message});
+}
+}
+
+export const changePassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    const encrypted = await bcrypt.hash(password.toString(), 12);
+
+    await UserModel.findByIdAndUpdate(req.user.id, {
+      password: encrypted,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
